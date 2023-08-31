@@ -4,7 +4,12 @@
 
 This is an Obsidian plugin that formats my flavour of markdown TODO lists.
 
-It transforms something like the following
+## Installation
+
+Todork is not available on the Obsidian community plugins directory. I recommend installing [BRAT](https://tfthacker.com/BRAT)
+and pointing it to this repo. Alternatively, you can `git clone` this repo into your `.obsidian/plugins` directory within your vault.
+
+## Example
 
 ```
 This is a top-level note.
@@ -19,7 +24,7 @@ This is a top-level note.
 - [x] It will be formatted separately from the tasks above
 ```
 
-into
+gets formatted into
 
 ```
 This is a top-level note.
