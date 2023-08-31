@@ -91,10 +91,12 @@ function compareElements(a, b) {
       } else {
         return 0;
       }
+    } else if (b.line.trim() === "") {
+      return 0;
     } else {
       return 1;
     }
-  } else if (bCompletedTask !== undefined) {
+  } else if (bCompletedTask !== undefined && a.line.trim() !== "") {
     return -1;
   } else {
     return 0;
@@ -138,7 +140,6 @@ function sortLines(lines) {
   var linesList = Belt_List.fromArray(lines);
   var elements = parseElements(linesList);
   var sortedElements = sortElements(elements);
-  console.log("Sorted", sortedElements);
   return Belt_List.toArray(elementsToLines(sortedElements));
 }
 

@@ -63,13 +63,16 @@ let parseTaskIsCompleted = (line) => {
 }
 
 let compareElements = (a, b) => {
+    open Js.String2
+
     let aCompletedTask = parseTaskIsCompleted(a.line)
     let bCompletedTask = parseTaskIsCompleted(b.line)
 
     switch (aCompletedTask, bCompletedTask) {
     | (None, None) => 0
-    | (Some(_), None) => 1
-    | (None, Some(_)) => -1
+    // Retain the order of empty lines
+    | (Some(_), None) => b.line->trim === "" ? 0 : 1
+    | (None, Some(_)) => a.line->trim === "" ? 0 : -1
     | (Some(false), Some(false)) => 0
     | (Some(true), Some(false)) => -1
     | (Some(false), Some(true)) => 1
@@ -110,8 +113,6 @@ let sortLines = (lines) => {
     let elements = parseElements(linesList)
 
     let sortedElements = sortElements(elements)
-
-    Js.Console.log2("Sorted", sortedElements)
-    
+ 
     elementsToLines(sortedElements)->Belt.List.toArray
 }
