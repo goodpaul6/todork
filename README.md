@@ -49,4 +49,4 @@ Here are the comparison rules at the moment:
 - Completed tasks are sorted before incomplete tasks
 
 The sorted tasks are then converted back into lines and returned from the `sortLines` function, which
-is the only function the Obsidian plugin calls.
+is the only function the Obsidian plugin (located in `main.ts`) calls.
