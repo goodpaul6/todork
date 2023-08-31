@@ -1,5 +1,7 @@
 # Todork
 
+![Todork in action](https://github.com/goodpaul6/todork/assets/3721423/59ea0a05-bcf8-4ed4-b36c-9cc35a7148be)
+
 This is an Obsidian plugin that formats my flavour of markdown TODO lists.
 
 It transforms something like the following
@@ -31,6 +33,9 @@ This is a top-level note.
 - [x] It will be formatted separately from the tasks above
 - [ ] This is a separate "group" of tasks
 ```
+
+This is somewhat non-trivial because it has to retain the hierarchy of tasks,
+top-level notes, and whitespace.
 
 ## Details
 
