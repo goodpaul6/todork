@@ -3,7 +3,7 @@
 	"name": "Todork",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin sorts markdown TODOs.",
+	"description": "This plugin sorts markdown tasks.",
 	"author": "goodpaul6",
 	"authorUrl": "https://apaar.dev",
 	"isDesktopOnly": false
