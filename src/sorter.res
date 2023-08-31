@@ -29,12 +29,10 @@ let parseElements = (lines) => {
             if lineIndentLevel <= parentIndentLevel {
                 (accElements, lines)
             } else {
-                open Js.List
-
                 let (children, linesAfterChildren) = parseChildrenRec(list{}, lineIndentLevel, restLines)
 
                 let newAcc = list{
-                    { line, children: children->rev },
+                    { line, children: children->Js.List.rev },
                     ...accElements
                 }
 
@@ -47,7 +45,7 @@ let parseElements = (lines) => {
     elements->Js.List.rev
 }
 
-let taskRe = %re("/\s+[-\*]\s+\[(.?)\]/")
+let taskRe = %re("/\s*[-\*]\s+\[(.?)\]/")
 
 // If this line is a task, returns Some(whether or not the task is completed) otherwise returns null
 let parseTaskIsCompleted = (line) => {
@@ -79,8 +77,17 @@ let compareElements = (a, b) => {
     }
 }
 
-let sortElements = (elements) => {
-    elements->Belt.List.sort(compareElements)
+let rec sortElements = (elements) => { 
+    open Belt.List
+
+    let elemsWithSortedChildren = elements->map(elem => {
+        line: elem.line,
+        children: sortElements(elem.children)
+    })
+
+    let elementsArr = elemsWithSortedChildren->toArray
+    elementsArr->Belt.SortArray.stableSortInPlaceBy(compareElements)
+    elementsArr->fromArray
 }
 
 let elementsToLines = (elements) => {
@@ -88,7 +95,9 @@ let elementsToLines = (elements) => {
         switch elements {
         | list{} => accLines
         | list{element, ...restElements} =>
-            elementsToLinesRec(list{element.line, ...accLines}, restElements)
+            let accLinesWithChildren = elementsToLinesRec(list{element.line, ...accLines}, element.children)
+
+            elementsToLinesRec(accLinesWithChildren, restElements)
         }
 
     let lines = elementsToLinesRec(list{}, elements)
@@ -99,7 +108,10 @@ let elementsToLines = (elements) => {
 let sortLines = (lines) => {
     let linesList = lines->Belt.List.fromArray
     let elements = parseElements(linesList)
+
     let sortedElements = sortElements(elements)
+
+    Js.Console.log2("Sorted", sortedElements)
     
     elementsToLines(sortedElements)->Belt.List.toArray
 }

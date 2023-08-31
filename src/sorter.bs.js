@@ -5,6 +5,7 @@ import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Caml_array from "rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Belt_SortArray from "rescript/lib/es6/belt_SortArray.js";
 
 function indentLevel(line) {
   var _curLevel = 0;
@@ -63,7 +64,7 @@ function parseElements(lines) {
   return Js_list.rev(match[0]);
 }
 
-var taskRe = /\s+[-\*]\s+\[(.?)\]/;
+var taskRe = /\s*[-\*]\s+\[(.?)\]/;
 
 function parseTaskIsCompleted(line) {
   var resOpt = taskRe.exec(line);
@@ -101,7 +102,15 @@ function compareElements(a, b) {
 }
 
 function sortElements(elements) {
-  return Belt_List.sort(elements, compareElements);
+  var elemsWithSortedChildren = Belt_List.map(elements, (function (elem) {
+          return {
+                  line: elem.line,
+                  children: sortElements(elem.children)
+                };
+        }));
+  var elementsArr = Belt_List.toArray(elemsWithSortedChildren);
+  Belt_SortArray.stableSortInPlaceBy(elementsArr, compareElements);
+  return Belt_List.fromArray(elementsArr);
 }
 
 function elementsToLines(elements) {
@@ -112,11 +121,13 @@ function elementsToLines(elements) {
       if (!elements) {
         return accLines;
       }
+      var element = elements.hd;
+      var accLinesWithChildren = elementsToLinesRec({
+            hd: element.line,
+            tl: accLines
+          }, element.children);
       _elements = elements.tl;
-      _accLines = {
-        hd: elements.hd.line,
-        tl: accLines
-      };
+      _accLines = accLinesWithChildren;
       continue ;
     };
   };
@@ -126,7 +137,8 @@ function elementsToLines(elements) {
 function sortLines(lines) {
   var linesList = Belt_List.fromArray(lines);
   var elements = parseElements(linesList);
-  var sortedElements = Belt_List.sort(elements, compareElements);
+  var sortedElements = sortElements(elements);
+  console.log("Sorted", sortedElements);
   return Belt_List.toArray(elementsToLines(sortedElements));
 }
 
