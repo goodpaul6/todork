@@ -1,6 +1,7 @@
 @genType
 type config = {
     completedToTop: bool,
+    notesBeforeTasks: bool,
 }
 
 type rec element = {
@@ -73,17 +74,19 @@ let compareElements = (a, b, cfg) => {
     let aCompletedTask = parseTaskIsCompleted(a.line)
     let bCompletedTask = parseTaskIsCompleted(b.line)
 
-    switch (aCompletedTask, bCompletedTask, cfg.completedToTop) {
-    | (None, None, _) => 0
+    switch (aCompletedTask, bCompletedTask, cfg.completedToTop, cfg.notesBeforeTasks) {
+    | (None, None, _, _) => 0
     // Retain the order of empty lines
-    | (Some(_), None, _) => b.line->trim === "" ? 0 : 1
-    | (None, Some(_), _) => a.line->trim === "" ? 0 : -1
-    | (Some(false), Some(false), _) => 0
-    | (Some(true), Some(true), _) => 0
-    | (Some(true), Some(false), true) => -1
-    | (Some(false), Some(true), true) => 1
-    | (Some(true), Some(false), false) => 1
-    | (Some(false), Some(true), false) => -1
+    | (Some(_), None, _, true) => b.line->trim === "" ? 0 : 1
+    | (None, Some(_), _, true) => a.line->trim === "" ? 0 : -1
+    | (Some(_), None, _, false) => b.line->trim === "" ? 0 : -1
+    | (None, Some(_), _, false) => a.line->trim === "" ? 0 : 1
+    | (Some(false), Some(false), _, _) => 0
+    | (Some(true), Some(true), _, _) => 0
+    | (Some(true), Some(false), true, _) => -1
+    | (Some(false), Some(true), true, _) => 1
+    | (Some(true), Some(false), false, _) => 1
+    | (Some(false), Some(true), false, _) => -1
     }
 }
 

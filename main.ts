@@ -13,11 +13,13 @@ import { sortLines } from "src/sorter.gen";
 interface PluginSettings {
 	indentWidth: 4;
 	completedToTop: boolean;
+	notesBeforeTasks: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
 	indentWidth: 4,
 	completedToTop: true,
+	notesBeforeTasks: true,
 };
 
 export default class Todork extends Plugin {
@@ -49,6 +51,7 @@ export default class Todork extends Plugin {
 				const lines = text.split("\n");
 				const sortedLines = sortLines(lines, {
 					completedToTop: this.settings.completedToTop,
+					notesBeforeTasks: this.settings.notesBeforeTasks,
 				});
 
 				editor.replaceRange(sortedLines.join("\n"), start, end);
@@ -98,6 +101,27 @@ export class SettingTab extends PluginSettingTab {
 					)
 					.onChange(async (value) => {
 						this.plugin.settings.completedToTop = value === "top";
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Note ordering")
+			.setDesc(
+				"Whether bullet-point notes should move before or after tasks."
+			)
+			.addDropdown((option) =>
+				option
+					.addOption("before", "Notes before tasks")
+					.addOption("after", "Notes after tasks")
+					.setValue(
+						this.plugin.settings.notesBeforeTasks
+							? "before"
+							: "after"
+					)
+					.onChange(async (value) => {
+						this.plugin.settings.notesBeforeTasks =
+							value === "before";
 						await this.plugin.saveSettings();
 					})
 			);
