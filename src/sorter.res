@@ -1,3 +1,8 @@
+@genType
+type config = {
+    completedToTop: bool,
+}
+
 type rec element = {
     line: string,
     children: list<element>,
@@ -62,34 +67,36 @@ let parseTaskIsCompleted = (line) => {
     )->map((s) => s !== " ")
 }
 
-let compareElements = (a, b) => {
+let compareElements = (a, b, cfg) => {
     open Js.String2
 
     let aCompletedTask = parseTaskIsCompleted(a.line)
     let bCompletedTask = parseTaskIsCompleted(b.line)
 
-    switch (aCompletedTask, bCompletedTask) {
-    | (None, None) => 0
+    switch (aCompletedTask, bCompletedTask, cfg.completedToTop) {
+    | (None, None, _) => 0
     // Retain the order of empty lines
-    | (Some(_), None) => b.line->trim === "" ? 0 : 1
-    | (None, Some(_)) => a.line->trim === "" ? 0 : -1
-    | (Some(false), Some(false)) => 0
-    | (Some(true), Some(false)) => -1
-    | (Some(false), Some(true)) => 1
-    | (Some(true), Some(true)) => 0
+    | (Some(_), None, _) => b.line->trim === "" ? 0 : 1
+    | (None, Some(_), _) => a.line->trim === "" ? 0 : -1
+    | (Some(false), Some(false), _) => 0
+    | (Some(true), Some(true), _) => 0
+    | (Some(true), Some(false), true) => -1
+    | (Some(false), Some(true), true) => 1
+    | (Some(true), Some(false), false) => 1
+    | (Some(false), Some(true), false) => -1
     }
 }
 
-let rec sortElements = (elements) => { 
+let rec sortElements = (elements, cfg) => {
     open Belt.List
 
     let elemsWithSortedChildren = elements->map(elem => {
         line: elem.line,
-        children: sortElements(elem.children)
+        children: sortElements(elem.children, cfg)
     })
 
     let elementsArr = elemsWithSortedChildren->toArray
-    elementsArr->Belt.SortArray.stableSortInPlaceBy(compareElements)
+    elementsArr->Belt.SortArray.stableSortInPlaceBy((a, b) => compareElements(a, b, cfg))
     elementsArr->fromArray
 }
 
@@ -108,11 +115,11 @@ let elementsToLines = (elements) => {
 }
 
 @genType
-let sortLines = (lines) => {
+let sortLines = (lines, cfg) => {
     let linesList = lines->Belt.List.fromArray
     let elements = parseElements(linesList)
 
-    let sortedElements = sortElements(elements)
+    let sortedElements = sortElements(elements, cfg)
  
     elementsToLines(sortedElements)->Belt.List.toArray
 }

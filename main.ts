@@ -1,14 +1,23 @@
-import { Editor, Notice, EditorPosition, MarkdownView, Plugin } from "obsidian";
+import {
+	App,
+	PluginSettingTab,
+	Setting,
+	Editor,
+	Notice,
+	EditorPosition,
+	MarkdownView,
+	Plugin,
+} from "obsidian";
 import { sortLines } from "src/sorter.gen";
-
-// Remember to rename these classes and interfaces!
 
 interface PluginSettings {
 	indentWidth: 4;
+	completedToTop: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
 	indentWidth: 4,
+	completedToTop: true,
 };
 
 export default class Todork extends Plugin {
@@ -16,6 +25,8 @@ export default class Todork extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		this.addSettingTab(new SettingTab(this.app, this));
 
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
@@ -36,7 +47,9 @@ export default class Todork extends Plugin {
 
 				const text = editor.getRange(start, end);
 				const lines = text.split("\n");
-				const sortedLines = sortLines(lines);
+				const sortedLines = sortLines(lines, {
+					completedToTop: this.settings.completedToTop,
+				});
 
 				editor.replaceRange(sortedLines.join("\n"), start, end);
 			},
@@ -55,5 +68,38 @@ export default class Todork extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+}
+
+export class SettingTab extends PluginSettingTab {
+	plugin: Todork;
+
+	constructor(app: App, plugin: Todork) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		let { containerEl } = this;
+
+		containerEl.empty();
+
+		new Setting(containerEl)
+			.setName("Task ordering")
+			.setDesc(
+				"Whether your completed tasks should move to the top or bottom of your list."
+			)
+			.addDropdown((option) =>
+				option
+					.addOption("top", "Top")
+					.addOption("bottom", "Bottom")
+					.setValue(
+						this.plugin.settings.completedToTop ? "top" : "bottom"
+					)
+					.onChange(async (value) => {
+						this.plugin.settings.completedToTop = value === "top";
+						await this.plugin.saveSettings();
+					})
+			);
 	}
 }
