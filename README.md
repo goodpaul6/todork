@@ -7,7 +7,9 @@ This is an Obsidian plugin that formats my flavour of markdown TODO lists.
 ## Installation
 
 Todork is not available on the Obsidian community plugins directory. I recommend installing [BRAT](https://tfthacker.com/BRAT)
-and pointing it to this repo. Alternatively, you can `git clone` this repo into your `.obsidian/plugins` directory within your vault.
+and pointing it to this repo. 
+
+Alternatively, you can download `main.js` and `manifest.json` from a [release](https://github.com/goodpaul6/todork/releases/latest) into a folder within your `.obsidian/plugins` directory within your vault (e.g. `.obsidian/plugins/todork`).
 
 ## Example
 
