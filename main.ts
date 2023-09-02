@@ -3,7 +3,6 @@ import {
 	PluginSettingTab,
 	Setting,
 	Editor,
-	Notice,
 	EditorPosition,
 	MarkdownView,
 	Plugin,
